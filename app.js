@@ -11,14 +11,13 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 
 app.get("/", function (req, res) {
     res.send(JSON.stringify({Hello: port}));
 });
 
-app.get('/names/:listid', db.getNames);
-app.post('/list', db.postList);
+app.get('/names/:id', db.getNames);
 app.post('/list/name', db.postName);
 
 app.listen(port, function(){
