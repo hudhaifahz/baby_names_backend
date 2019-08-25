@@ -1,5 +1,7 @@
 const Pool = require('pg').Pool
 
+const uuidv1 = require("uuid/v1");
+
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -9,12 +11,62 @@ const pool = new Pool({
 })
 
 const getNames = (request, response) => {
-    pool.query('SELECT * FROM public.names', (error, results) => {
-        if (error) {
-            throw error
-        }
-        response.status(200).json(results.rows)
-        })
+
+  const { listid } = request.body
+
+  const getNames = {
+    name: 'get-names',
+    text: `SELECT babyname FROM public.names WHERE listid = $1`,
+    values: [listid],
+  }
+
+  pool.query(getNames, (error, results) => {
+      if (error) {
+          throw error
+      }
+      response.status(200).json(results.rows)
+    })
+}
+
+const postList = (request, response) => {
+
+  const { uuid } = request.body
+
+  console.log('uuid', request.body)
+
+  const postList = {
+    name: 'post-list',
+    text: `INSERT INTO public.lists ( "id" ) VALUES ( $1 )`,
+    values: [uuid],
+  }
+
+  pool.query(postList, (error, results) => {
+      if (error) {
+          throw error
+      }
+      response.status(200).json(results.rows)
+      })
+}
+
+const postName = (request, response) => {
+
+  const { uuid, name } = request.body
+  var nameuuid = uuidv1()
+
+  console.log('uuid', request.body)
+
+  const postName = {
+    name: 'post-name',
+    text: `INSERT INTO public.names ( "id", "babyname", "listid" ) VALUES ( $1, $2, $3 )`,
+    values: [nameuuid, name, uuid],
+  }
+
+  pool.query(postName, (error, results) => {
+      if (error) {
+          throw error
+      }
+      response.status(200).json(results.rows)
+      })
 }
 
 // const getUserById = (request, response) => {
@@ -68,6 +120,8 @@ const getNames = (request, response) => {
 
 module.exports = {
   getNames,
+  postList,
+  postName,
 //   getUserById,
 //   createUser,
 //   updateUser,
